@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/14.0.1">
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
 	<PropertyGroup>
 		<Version>0.0.0.26</Version>
 		<LangVersion>preview</LangVersion>
@@ -19,6 +19,10 @@
 		<ProjectReference Include="..\..\FFXIVClientStructs\FFXIVClientStructs\FFXIVClientStructs.csproj" Private="true" />
 		<ProjectReference Include="..\..\FFXIVClientStructs\InteropGenerator.Runtime\InteropGenerator.Runtime.csproj" Private="true" />
 		<ProjectReference Include="..\..\FFXIVClientStructs\InteropGenerator\InteropGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="croizat.clib" Version="1.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>

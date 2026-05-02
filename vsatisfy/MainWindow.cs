@@ -11,7 +11,6 @@ using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Interface.Colors;
 
 namespace Satisfy;
 
@@ -19,7 +18,6 @@ public unsafe class MainWindow : Window, IDisposable
 {
     private readonly IDalamudPluginInterface _dalamud;
     private readonly Achievements _achi = new();
-    private readonly Automation _auto = new();
     private readonly List<NPCInfo> _npcs = [];
     private readonly List<(uint Currency, int Amount, int Count)> _rewards = [];
     private bool _wasLoaded;
@@ -65,7 +63,7 @@ public unsafe class MainWindow : Window, IDisposable
 
     public void Dispose()
     {
-        _auto.Dispose();
+        Service.Automation.Dispose();
 
         _achi.AchievementProgress -= OnAchievementProgress;
         _achi.Dispose();
@@ -209,21 +207,20 @@ public unsafe class MainWindow : Window, IDisposable
 
     private void DrawMainTable()
     {
-        using (ImRaii.Disabled(!_auto.Running))
-            if (ImGui.Button("停止当前任务"))
-                _auto.Stop();
+        using (ImRaii.Disabled(!Service.Automation.Running))
+            if (ImGui.Button("Stop current task"))
+                Service.Automation.Stop();
         ImGui.SameLine();
-        ImGui.TextUnformatted($"当前状态: {_auto.CurrentTask?.Status ?? "空闲"}");
+        ImGui.TextUnformatted($"Status: {Service.Automation.CurrentTask?.Status ?? "idle"}");
 
-        ImGui.TextColored(ImGuiColors.DalamudOrange, "注意：此插件依赖 vnavmesh 寻路、 Artisan 进行制作、Questionable 进行采集，如果你已安装，请忽略本提示。");
         using var table = ImRaii.Table("main_table", 5);
         if (!table)
             return;
         ImGui.TableSetupColumn("NPC", ImGuiTableColumnFlags.WidthFixed, 100);
-        ImGui.TableSetupColumn("额外奖励", ImGuiTableColumnFlags.WidthFixed, 120);
-        ImGui.TableSetupColumn("交付进度", ImGuiTableColumnFlags.WidthFixed, 120);
-        ImGui.TableSetupColumn("成就进度", ImGuiTableColumnFlags.WidthFixed, 120);
-        ImGui.TableSetupColumn("操作");
+        ImGui.TableSetupColumn("Bonuses", ImGuiTableColumnFlags.WidthFixed, 90);
+        ImGui.TableSetupColumn("Deliveries", ImGuiTableColumnFlags.WidthFixed, 120);
+        ImGui.TableSetupColumn("Achievement", ImGuiTableColumnFlags.WidthFixed, 120);
+        ImGui.TableSetupColumn("Actions");
         ImGui.TableHeadersRow();
         foreach (var npc in _npcs)
         {
@@ -261,10 +258,10 @@ public unsafe class MainWindow : Window, IDisposable
         using var table = ImRaii.Table("currencies_table", 4);
         if (!table)
             return;
-        ImGui.TableSetupColumn("点数", ImGuiTableColumnFlags.WidthFixed, 180);
-        ImGui.TableSetupColumn("当前", ImGuiTableColumnFlags.WidthFixed, 80);
-        ImGui.TableSetupColumn("可获取", ImGuiTableColumnFlags.WidthFixed, 80);
-        ImGui.TableSetupColumn("溢出", ImGuiTableColumnFlags.WidthFixed, 80);
+        ImGui.TableSetupColumn("Currency", ImGuiTableColumnFlags.WidthFixed, 180);
+        ImGui.TableSetupColumn("Current", ImGuiTableColumnFlags.WidthFixed, 80);
+        ImGui.TableSetupColumn("Max gain", ImGuiTableColumnFlags.WidthFixed, 80);
+        ImGui.TableSetupColumn("Overcap", ImGuiTableColumnFlags.WidthFixed, 80);
         ImGui.TableHeadersRow();
         var cm = CurrencyManager.Instance();
         foreach (var reward in _rewards)
@@ -291,7 +288,7 @@ public unsafe class MainWindow : Window, IDisposable
 
     private void DrawDebug()
     {
-        if (ImGui.Button("重置成就数据"))
+        if (ImGui.Button("Reset achievement data"))
             foreach (var npc in _npcs)
                 npc.AchievementStart = npc.AchievementMax = 0;
 
@@ -367,14 +364,14 @@ public unsafe class MainWindow : Window, IDisposable
         if (remainingTurnins <= 0)
             return;
 
-        if (ImGui.Button("自动制作交付"))
-            _auto.Start(new AutoCraft(npc, _dalamud));
+        if (ImGui.Button("Auto craft turnin"))
+            Service.Automation.Start(new AutoCraft(npc));
         ImGui.SameLine();
-        if (ImGui.Button("自动采集交付"))
-            _auto.Start(new AutoGather(npc, _dalamud));
+        if (ImGui.Button("Auto gather turnin"))
+            Service.Automation.Start(new AutoGather(npc));
         ImGui.SameLine();
-        if (ImGui.Button("自动钓鱼交付"))
-            _auto.Start(new AutoFish(npc, _dalamud));
+        if (ImGui.Button("Auto fish turnin"))
+            Service.Automation.Start(new AutoFish(npc));
     }
 
     private void OnAchievementProgress(uint id, uint current, uint max)
