@@ -8,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.Interop;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Colors;
 using Lumina.Excel.Sheets;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -98,7 +99,7 @@ public unsafe class MainWindow : Window, IDisposable
             DrawCurrenciesTable();
         }
 
-        if (Plugin.Config.ShowDebugUI && ImGui.CollapsingHeader("Debug data"))
+        if (Plugin.Config.ShowDebugUI && ImGui.CollapsingHeader("调试"))
             DrawDebug();
     }
 
@@ -208,19 +209,21 @@ public unsafe class MainWindow : Window, IDisposable
     private void DrawMainTable()
     {
         using (ImRaii.Disabled(!Service.Automation.Running))
-            if (ImGui.Button("Stop current task"))
+            if (ImGui.Button("停止当前任务"))
                 Service.Automation.Stop();
         ImGui.SameLine();
-        ImGui.TextUnformatted($"Status: {Service.Automation.CurrentTask?.Status ?? "idle"}");
+        ImGui.TextUnformatted($"状态: {Service.Automation.CurrentTask?.Status ?? "空闲"}");
+
+        ImGui.TextColored(ImGuiColors.DalamudOrange, "注意：此插件依赖 vnavmesh 寻路、 Artisan 进行制作、Questionable 进行采集，如果你已安装，请忽略本提示。");
 
         using var table = ImRaii.Table("main_table", 5);
         if (!table)
             return;
         ImGui.TableSetupColumn("NPC", ImGuiTableColumnFlags.WidthFixed, 100);
-        ImGui.TableSetupColumn("Bonuses", ImGuiTableColumnFlags.WidthFixed, 90);
-        ImGui.TableSetupColumn("Deliveries", ImGuiTableColumnFlags.WidthFixed, 120);
-        ImGui.TableSetupColumn("Achievement", ImGuiTableColumnFlags.WidthFixed, 120);
-        ImGui.TableSetupColumn("Actions");
+        ImGui.TableSetupColumn("奖励加成", ImGuiTableColumnFlags.WidthFixed, 90);
+        ImGui.TableSetupColumn("交付次数", ImGuiTableColumnFlags.WidthFixed, 120);
+        ImGui.TableSetupColumn("成就", ImGuiTableColumnFlags.WidthFixed, 120);
+        ImGui.TableSetupColumn("操作");
         ImGui.TableHeadersRow();
         foreach (var npc in _npcs)
         {
@@ -258,10 +261,10 @@ public unsafe class MainWindow : Window, IDisposable
         using var table = ImRaii.Table("currencies_table", 4);
         if (!table)
             return;
-        ImGui.TableSetupColumn("Currency", ImGuiTableColumnFlags.WidthFixed, 180);
-        ImGui.TableSetupColumn("Current", ImGuiTableColumnFlags.WidthFixed, 80);
-        ImGui.TableSetupColumn("Max gain", ImGuiTableColumnFlags.WidthFixed, 80);
-        ImGui.TableSetupColumn("Overcap", ImGuiTableColumnFlags.WidthFixed, 80);
+        ImGui.TableSetupColumn("货币", ImGuiTableColumnFlags.WidthFixed, 180);
+        ImGui.TableSetupColumn("当前", ImGuiTableColumnFlags.WidthFixed, 80);
+        ImGui.TableSetupColumn("最大收益", ImGuiTableColumnFlags.WidthFixed, 80);
+        ImGui.TableSetupColumn("溢出", ImGuiTableColumnFlags.WidthFixed, 80);
         ImGui.TableHeadersRow();
         var cm = CurrencyManager.Instance();
         foreach (var reward in _rewards)
@@ -288,7 +291,7 @@ public unsafe class MainWindow : Window, IDisposable
 
     private void DrawDebug()
     {
-        if (ImGui.Button("Reset achievement data"))
+        if (ImGui.Button("重置成就数据"))
             foreach (var npc in _npcs)
                 npc.AchievementStart = npc.AchievementMax = 0;
 
@@ -364,13 +367,13 @@ public unsafe class MainWindow : Window, IDisposable
         if (remainingTurnins <= 0)
             return;
 
-        if (ImGui.Button("Auto craft turnin"))
+        if (ImGui.Button("自动制作交付"))
             Service.Automation.Start(new AutoCraft(npc));
         ImGui.SameLine();
-        if (ImGui.Button("Auto gather turnin"))
+        if (ImGui.Button("自动采集交付"))
             Service.Automation.Start(new AutoGather(npc));
         ImGui.SameLine();
-        if (ImGui.Button("Auto fish turnin"))
+        if (ImGui.Button("自动钓鱼交付"))
             Service.Automation.Start(new AutoFish(npc));
     }
 
