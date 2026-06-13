@@ -1,0 +1,19 @@
+[
+  {
+    "Author": "veyn",
+    "Name": "vsatisfy",
+    "InternalName": "vsatisfy",
+    "AssemblyVersion": "0.0.0.32",
+    "Description": "自动老主顾交付（制作/采集）",
+    "ApplicableVersion": "any",
+    "Tags": ["Custom Deliveries", "Automation", "Satisfaction"],
+    "DalamudApiLevel": 15,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "Punchline": "自动老主顾交付（制作/采集）",
+    "DownloadLinkInstall": "https://github.com/llm1016/DalamudPlugins/releases/download/v0.0.0.32/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/llm1016/DalamudPlugins/releases/download/v0.0.0.32/latest.zip"
+  }
+]
