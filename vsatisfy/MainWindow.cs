@@ -57,6 +57,7 @@ public unsafe class MainWindow : Window, IDisposable
         _npcs[8].InitHardcodedData(3173, 816);
         _npcs[9].InitHardcodedData(3361, 956);
         _npcs[10].InitHardcodedData(3602, 1190);
+        _npcs[11].InitHardcodedData(3996, 1185);
 
         if (_npcs.Any(n => n.AchievementId is 0 || n.TerritoryId is 0))
             Service.Log.Warning("Some NPCs are missing hardcoded data. Please report this on GitHub.");
@@ -247,7 +248,7 @@ public unsafe class MainWindow : Window, IDisposable
 
             ImGui.TableNextColumn();
             if (npc.AchievementMax > 0)
-                ImGui.ProgressBar((float)npc.AchievementCur / npc.AchievementMax, new(120, 0), $"{npc.AchievementCur} / {npc.AchievementMax}");
+                ImGui.ProgressBar((float)npc.AchievementCur / npc.AchievementMax, new(120, 0), $"{npc.AchievementCur} / {npc.AchievementMax} ({(npc.AchievementMax - npc.AchievementCur) / 6.0:0.0})");
             else if (npc.AchievementId != 0 && !Plugin.Config.AutoFetchAchievements && ImGui.Button("Fetch...", new(120, 0)))
                 _achi.Request(npc.AchievementId);
 
